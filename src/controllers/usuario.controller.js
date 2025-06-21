@@ -4,8 +4,7 @@ const jwt = require ("jsonwebtoken");
 
 const obtenerDatosUsuario = async (req, res) => {
     try {
-        const resultadoVerificar = true;
-        // const resultadoVerificar = verificarToken(req);
+        const resultadoVerificar = verificarToken(req);
 
         if (resultadoVerificar.estado === false) {
             console.log("Token inválido:", resultadoVerificar.error);
@@ -37,8 +36,7 @@ const obtenerDatosUsuario = async (req, res) => {
 
 const modificarUsuario = async (req, res) => {
     try{
-        const resultadoVerificar = true;
-        // const resultadoVerificar = verificarToken(req);
+        const resultadoVerificar = verificarToken(req);
         if(resultadoVerificar.estado == false){
             return res.send({codigo: -1, mensaje: resultadoVerificar.error})
         }
