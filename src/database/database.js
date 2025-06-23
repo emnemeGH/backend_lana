@@ -2,18 +2,16 @@ import mysql from "mysql2/promise";
 
 import config from "./../config";
 
-const connection = mysql.createConnection({
-    host: config.host,
-    database: config.database,
-    user: config.user,
-    password: config.password
-});
-
-
-const getConnection = () => {
+// FUNCION ASYNC QUE DEVUELVE CONEXIÓN ABIERTA
+async function getConnection() {
+    // SE CORRIGE: SE DEBE AWAIT EN LA CREACION DE CONEXION
+    const connection = await mysql.createConnection({
+        host: config.host,
+        database: config.database,
+        user: config.user,
+        password: config.password
+    });
     return connection;
 }
 
-module.exports = {
-    getConnection
-}
+export { getConnection }; // USAR EXPORT PARA CONSISTENCIA CON IMPORT

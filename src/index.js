@@ -1,3 +1,7 @@
+import dotenv from "dotenv";   // IMPORTAMOS dotenv
+dotenv.config();               // CARGAMOS VARIABLES DEL .env
+
+
 import app from "./app";
 const jwt = require("jsonwebtoken");
 
