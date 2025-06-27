@@ -89,7 +89,12 @@ const crearUsuario = async (req, res) => {
             telefono,
             rol,
             password
-        } = req.body
+        } = req.body;
+
+        // Validación básica
+        if (!nombre || !apellido || !email || !rol || !password) {
+            return res.status(400).json({ mensaje: "Faltan campos obligatorios" });
+        }
 
         const usuario = {
             nombre,
@@ -99,23 +104,23 @@ const crearUsuario = async (req, res) => {
             email,
             telefono,
             rol,
-        }
+        };
 
         const connection = await getConnection();
-        const response = await connection.query("INSERT INTO usuario set ?", usuario)
+        const response = await connection.query("INSERT INTO usuario SET ?", usuario);
+
         if (response && response.affectedRows > 0) {
             res.json({ codigo: 200, mensaje: "Usuario registrado exitosamente", payload: [{ id_usuario: response.insertId }] });
-        }
-        else {
+        } else {
             res.json({ codigo: -1, mensaje: "Error registrando usuario", payload: [] });
         }
 
-    }
-    catch (error) {
-        res.status(500);
-        res.send(error.message);
+    } catch (error) {
+        console.error("Error en crearUsuario:", error);
+        res.status(500).json({ mensaje: error.message });  // <--- JSON válido
     }
 }
+
 
 
 

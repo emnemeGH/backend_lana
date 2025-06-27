@@ -33,8 +33,9 @@ const cargarProducto = async (req, res) => {
     try {
         const resultadoVerificar = verificarToken(req);
         if (resultadoVerificar.estado == false) {
-            return res.send({ codigo: -1, mensaje: resultadoVerificar.error })
+            return res.send({ codigo: -1, mensaje: resultadoVerificar.error });
         }
+
         const {
             nombre,
             descripcion,
@@ -42,7 +43,8 @@ const cargarProducto = async (req, res) => {
             genero,
             id_categoria,
             imagen
-        } = req.body
+        } = req.body;
+
         const producto = {
             nombre,
             descripcion,
@@ -50,29 +52,33 @@ const cargarProducto = async (req, res) => {
             genero,
             id_categoria,
             imagen
-        }
+        };
+
         const connection = await getConnection();
-        const response = await connection.query("INSERT into producto set ?", producto);
-        if (response && response.affectedRows > 0) {
+
+        const response = await connection.query("INSERT INTO producto SET ?", producto);
+        const resultado = response[0];
+
+        console.log("Respuesta MySQL al insertar:", resultado);
+
+        if (resultado?.insertId) {
             res.json({
                 codigo: 200,
                 mensaje: "Producto cargado",
-                payload: [{ idCategoria: response.insertId }]
+                payload: [{ id_producto: resultado.insertId }]
+            });
+        } else {
+            res.json({
+                codigo: -1,
+                mensaje: "Error cargando producto",
+                payload: []
             });
         }
-        else {
-            res.json({ codigo: -1, mensaje: "Error cargando producto", payload: [] });
-        }
+    } catch (err) {
+        console.error("Error en el backend al cargar producto:", err);
+        res.status(500).json({ mensaje: err.message });
     }
-
-
-
-
-    catch (error) {
-        res.status(500);
-        res.send(error.message)
-    }
-}
+};
 
 const modificarStock = async (req, res) => {
     try {
