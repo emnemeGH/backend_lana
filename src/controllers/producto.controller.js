@@ -347,21 +347,22 @@ const eliminarProductoCarrito = async (req, res) => {
         const { id_usuario, id_inventario } = req.body;
 
         const connection = await getConnection();
-        const response = await connection.query(
+        const [result] = await connection.query(
             "DELETE FROM carrito WHERE id_usuario = ? AND id_inventario = ?",
             [id_usuario, id_inventario]
         );
 
-        if (response && response.affectedRows > 0) {
+        if (result.affectedRows > 0) {
             res.json({ codigo: 200, mensaje: "Producto eliminado del carrito correctamente" });
         } else {
-            res.json({ codigo: 400, mensaje: "Error eliminando producto del carrito" });
+            res.json({ codigo: 400, mensaje: "No se encontró el producto en el carrito" });
         }
     } catch (error) {
         res.status(500);
         res.send(error.message);
     }
 };
+
 
 const obtenerProductosCarrito = async (req, res) => {
     try {
@@ -378,7 +379,7 @@ const obtenerProductosCarrito = async (req, res) => {
         res.json({
             codigo: 200,
             mensaje: "Productos del carrito obtenidos correctamente",
-            payload: response
+            payload: response[0] // Solo los datos reales
         });
     } catch (error) {
         res.status(500);
