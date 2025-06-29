@@ -84,95 +84,119 @@ const modificarStock = async (req, res) => {
     try {
         const resultadoVerificar = verificarToken(req);
         if (resultadoVerificar.estado == false) {
-            return res.send({ codigo: -1, mensaje: resultadoVerificar.error })
+            return res.send({ codigo: -1, mensaje: resultadoVerificar.error });
         }
         const {
             id_inventario,
             stock
-        } = req.body
+        } = req.body;
+
         const connection = await getConnection();
-        const response = await connection.query("UPDATE inventario i set i.stock = ? where id_inventario = ?", [stock, id_inventario]);
-        if (response && response.affectedRows > 0) {
+        const [result] = await connection.query(
+            "UPDATE inventario i SET i.stock = ? WHERE id_inventario = ?",
+            [stock, id_inventario]
+        );
+
+        if (result.affectedRows > 0) {
             res.json({
                 codigo: 200,
                 mensaje: "Stock modificado correctamente",
                 payload: []
             });
+        } else {
+            res.json({
+                codigo: -1,
+                mensaje: "Error modificando stock",
+                payload: []
+            });
         }
-        else {
-            res.json({ codigo: -1, mensaje: "Error modificando stock", payload: [] });
-        }
-    }
-
-    catch (error) {
+    } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send(error.message);
     }
-}
+};
+
 
 const crearInventario = async (req, res) => {
     try {
         const resultadoVerificar = verificarToken(req);
         if (resultadoVerificar.estado == false) {
-            return res.send({ codigo: -1, mensaje: resultadoVerificar.error })
+            return res.send({ codigo: -1, mensaje: resultadoVerificar.error });
         }
         const {
             talle,
             color,
             stock,
             id_producto
-        } = req.body
+        } = req.body;
+
         const inventario = {
             talle,
             color,
             stock,
             id_producto
-        }
+        };
+
         const connection = await getConnection();
-        const response = await connection.query("INSERT inventario set ?", inventario);
-        if (response && response.affectedRows > 0) {
+        const [result] = await connection.query("INSERT INTO inventario SET ?", inventario);
+
+        if (result.affectedRows > 0) {
             res.json({
                 codigo: 200,
                 mensaje: "Inventario creado exitosamente",
-                payload: [{ idCategoria: response.insertId }]
+                payload: [{ idInventario: result.insertId }]
             });
-        }
-        else {
+        } else {
             res.json({ codigo: -1, mensaje: "Error creando inventario", payload: [] });
         }
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500);
         res.send(error.message);
     }
-}
+};
+
 
 const crearCategoria = async (req, res) => {
     try {
         const resultadoVerificar = verificarToken(req);
         if (resultadoVerificar.estado == false) {
-            return res.send({ codigo: -1, mensaje: resultadoVerificar.error })
-        }
-        const {
-            nombre
-        } = req.body;
-        const categoria = { nombre }
-        const connection = await getConnection();
-        const response = await connection.query("INSERT into categoria set ?", categoria);
-        if (response && response.affectedRows > 0) {
-            res.json({
-                codigo: 200,
-                mensaje: "Categoría añadida",
-                payload: [{ idCategoria: response.insertId }]
-            });
+            return res.status(401).json({ codigo: -1, mensaje: resultadoVerificar.error });
         }
 
+        const { nombre } = req.body;
+
+        if (!nombre) {
+            return res.status(400).json({ codigo: -1, mensaje: "Falta el nombre de la categoría" });
+        }
+
+        const categoria = { nombre };
+        const connection = await getConnection();
+        const response = await connection.query("INSERT INTO categoria SET ?", categoria);
+        const resultado = response[0]; // Extraés el objeto con affectedRows e insertId
+
+        if (resultado.affectedRows > 0) {
+            return res.status(200).json({
+                codigo: 200,
+                mensaje: "Categoría añadida",
+                payload: [{ idCategoria: resultado.insertId }]
+            });
+        } else {
+            return res.status(500).json({
+                codigo: -1,
+                mensaje: "No se pudo insertar la categoría",
+                payload: []
+            });
+        }
+    } catch (error) {
+        console.error("Error en crearCategoria:", error);
+        return res.status(500).json({
+            codigo: -1,
+            mensaje: "Error interno del servidor",
+            error: error.message
+        });
     }
-    catch (error) {
-        res.status(500);
-        res.send(error.message);
-    }
-}
+};
+
 
 const obtenerCategorias = async (req, res) => {
     try {
@@ -189,7 +213,6 @@ const obtenerCategorias = async (req, res) => {
     }
 }
 
-
 const agregarFavorito = async (req, res) => {
     try {
         const resultadoVerificar = verificarToken(req);
@@ -197,28 +220,27 @@ const agregarFavorito = async (req, res) => {
             return res.send({ codigo: -1, mensaje: resultadoVerificar.error });
         }
 
-        const {
-            id_producto,
-            id_usuario
-        } = req.body;
-
+        const { id_producto, id_usuario } = req.body;
         const favorito = { id_producto, id_usuario };
 
         const connection = await getConnection();
-        const response = await connection.query("INSERT INTO favorito SET ?", favorito);
+        const [result] = await connection.query("INSERT INTO favorito SET ?", favorito);
 
-        if (response && response.affectedRows > 0) {
+        if (result.affectedRows > 0) {
             res.json({
                 codigo: 200,
                 mensaje: "Producto añadido a favoritos",
-                payload: [{ idFavorito: response.insertId }]
+                payload: [{ idFavorito: result.insertId }]
             });
+        } else {
+            res.json({ codigo: -1, mensaje: "Error añadiendo a favoritos", payload: [] });
         }
     } catch (error) {
         res.status(500);
         res.send(error.message);
     }
 };
+
 
 
 function verificarToken(req) {
@@ -294,23 +316,26 @@ const agregarACarrito = async (req, res) => {
         }
 
         const { id_inventario, id_usuario } = req.body;
-        const carritoProducto = { id_inventario, id_usuario, };
+        const carritoProducto = { id_inventario, id_usuario };
 
         const connection = await getConnection();
-        const response = await connection.query("INSERT INTO carrito SET ?", carritoProducto);
+        const [result] = await connection.query("INSERT INTO carrito SET ?", carritoProducto);
 
-        if (response && response.affectedRows > 0) {
+        if (result.affectedRows > 0) {
             res.json({
                 codigo: 200,
                 mensaje: "Producto agregado al carrito",
-                payload: [{ idCarrito: response.insertId }]
+                payload: [{ idCarrito: result.insertId }]
             });
+        } else {
+            res.json({ codigo: -1, mensaje: "Error agregando producto al carrito", payload: [] });
         }
     } catch (error) {
         res.status(500);
         res.send(error.message);
     }
 };
+
 
 const eliminarProductoCarrito = async (req, res) => {
     try {
