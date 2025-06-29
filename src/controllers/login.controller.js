@@ -22,7 +22,7 @@ const login = async (req, res) => {
                 {
                     sub: usuario.id_usuario,
                     name: usuario.nombre,
-                    exp: Math.floor(Date.now() / 1000) + 60 * 30 // Expira en 30 minutos
+                    exp: Math.floor(Date.now() / 1000) + 60 * 90 // Expira en 90 minutos
                 },
                 secret
             );
