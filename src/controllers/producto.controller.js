@@ -20,8 +20,9 @@ const obtenerDatosProducto = async (req, res) => {
         const id = req.params.id
         const connection = await getConnection();
         const response = await connection.query("select p.nombre as producto, p.descripcion as descripcion, p.precio as precio, p.genero as genero, p.imagen as ulrImagen, c.id_categoria as idCategoria, c.nombre as categoria, i.talle, i.color, i.stock, i.id_inventario as idInventario from producto p join categoria c on p.id_categoria = c.id_categoria join inventario i on i.id_producto = p.id_producto where p.id_producto = ?;", [id]);
+        const respuesta = response[0];
         console.log(response)
-        res.json({ codigo: 200, mensaje: "OK", payload: response });
+        res.json({ codigo: 200, mensaje: "OK", payload: respuesta });
     }
     catch (error) {
         res.status(500);
@@ -273,11 +274,12 @@ const obtenerFavoritos = async (req, res) => {
 
         const connection = await getConnection();
         const response = await connection.query("SELECT id_producto as idProducto FROM favorito WHERE id_usuario = ?", [id_usuario]);
+        const respuesta = response[0];
 
         res.json({
             codigo: 200,
             mensaje: "IDs de productos favoritos obtenidos correctamente",
-            payload: response
+            payload: respuesta
         });
     } catch (error) {
         res.status(500);
