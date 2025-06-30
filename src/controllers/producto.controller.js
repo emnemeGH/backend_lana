@@ -297,9 +297,9 @@ const eliminarFavorito = async (req, res) => {
         const { id_usuario, id_producto } = req.body;
 
         const connection = await getConnection();
-        const response = await connection.query("DELETE FROM favorito WHERE id_usuario = ? AND id_producto = ?", [id_usuario, id_producto]);
+        const [result] = await connection.query("DELETE FROM favorito WHERE id_usuario = ? AND id_producto = ?", [id_usuario, id_producto]);
 
-        if (response && response.affectedRows > 0) {
+        if (result.affectedRows > 0) {
             res.json({ codigo: 200, mensaje: "Favorito eliminado correctamente" });
         } else {
             res.json({ codigo: 400, mensaje: "Error eliminando producto de favoritos" });
