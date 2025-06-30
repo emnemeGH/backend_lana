@@ -6,8 +6,8 @@ const jwt = require("jsonwebtoken");
 const obtenerProductos = async (req, res) => {
     try {
         const connection = await getConnection();
-        const response = await connection.query("select p.nombre as producto, p.descripcion as descripcion, p.precio as precio, p.genero as genero, p.imagen as ulrImagen, c.id_categoria as idCategoria, c.nombre as categoria from producto p join categoria c on p.id_categoria = c.id_categoria;")
-        res.json({ codigo: 200, mensaje: "OK", payload: response });
+        const [rows] = await connection.query("select p.nombre as producto, p.descripcion as descripcion, p.precio as precio, p.genero as genero, p.imagen as ulrImagen, c.id_categoria as idCategoria, c.nombre as categoria from producto p join categoria c on p.id_categoria = c.id_categoria;")
+        res.json({ codigo: 200, mensaje: "OK", payload: rows });
     }
     catch (error) {
         res.status(500);
