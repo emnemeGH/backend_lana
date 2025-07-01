@@ -17,11 +17,30 @@ const obtenerProductos = async (req, res) => {
 
 const obtenerDatosProducto = async (req, res) => {
     try {
-        const id = req.params.id
+        const id = req.params.id;
         const connection = await getConnection();
-        const response = await connection.query("select p.nombre as producto, p.descripcion as descripcion, p.precio as precio, p.genero as genero, p.imagen as ulrImagen, c.id_categoria as idCategoria, c.nombre as categoria, i.talle, i.color, i.stock, i.id_inventario as idInventario from producto p join categoria c on p.id_categoria = c.id_categoria join inventario i on i.id_producto = p.id_producto where p.id_producto = ?;", [id]);
+
+        const response = await connection.query(`
+            SELECT 
+                p.id_producto AS idProducto,
+                p.nombre AS producto,
+                p.descripcion AS descripcion,
+                p.precio AS precio,
+                p.genero AS genero,
+                p.imagen AS ulrImagen,
+                c.id_categoria AS idCategoria,
+                c.nombre AS categoria,
+                i.talle,
+                i.color,
+                i.stock,
+                i.id_inventario AS idInventario
+            FROM producto p
+            JOIN categoria c ON p.id_categoria = c.id_categoria
+            JOIN inventario i ON i.id_producto = p.id_producto
+            WHERE p.id_producto = ?;
+        `, [id]);
+
         const respuesta = response[0];
-        console.log(response)
         res.json({ codigo: 200, mensaje: "OK", payload: respuesta });
     }
     catch (error) {
@@ -29,6 +48,7 @@ const obtenerDatosProducto = async (req, res) => {
         res.send(error.message);
     }
 }
+
 
 const cargarProducto = async (req, res) => {
     try {
